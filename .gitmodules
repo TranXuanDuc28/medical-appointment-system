@@ -1,0 +1,6 @@
+[submodule "backend"]
+	path = backend
+	url = https://github.com/TranXuanDuc28/medical-appointment-system-NodeJs.git
+[submodule "frontend"]
+	path = frontend
+	url = https://github.com/TranXuanDuc28/medical-appointment-system-ReactJs.git
