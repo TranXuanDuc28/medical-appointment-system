@@ -79,27 +79,39 @@ sequenceDiagram
 ```
 
 ### 4. Tự động hóa Thanh toán VietQR & Casso Webhook (VietQR Payment Flow)
-Luồng thanh toán tự động, nhận dữ liệu giao dịch thời gian thực và đồng bộ Socket.io lên màn hình Client.
+Mô tả quy trình tạo mã thanh toán VietQR động đính kèm email đơn thuốc sau khi khám xong, bệnh nhân chuyển khoản, và Casso Webhook cập nhật trạng thái tự động realtime.
 
 ```mermaid
 sequenceDiagram
   actor Patient as Bệnh nhân
+  actor Doctor as Bác sĩ
   participant Client as ReactJS Frontend
   participant Server as NodeJS Backend
   participant DB as MySQL Database
-  participant VietQR as VietQR API
+  participant VietQR as VietQR API (img.vietqr.io)
+  participant Mail as Gmail SMTP Service
   participant Casso as Casso Gateway
   participant Bank as Ngân hàng (MBBank...)
 
-  Patient->>Client: Chọn thanh toán lịch khám
-  Client->>Server: Yêu cầu thông tin thanh toán
-  Server->>VietQR: Gọi API sinh QR Code tự động (kèm số tiền & cú pháp chuyển khoản)
-  VietQR-->>Server: Trả về hình ảnh mã QR
-  Server-->>Client: Hiển thị QR Code cho bệnh nhân
-  Patient->>Bank: Quét QR & Thực hiện chuyển khoản trên App Mobile Banking
+  %% Bước 1: Kê đơn & Gửi VietQR qua Email
+  Doctor->>Client: Điền đơn thuốc & Tổng tiền -> Click "Gửi hóa đơn" (Kê khai)
+  Client->>Server: Gửi POST /api/send-remedy
+  Server->>DB: Cập nhật trạng thái Booking (Trạng thái: S3 - Gửi hóa đơn)
+  Server->>VietQR: Sinh Link mã QR động chứa số tiền, cú pháp "BOOKING[id]"
+  Server->>Mail: Gửi Email kèm Đơn thuốc (PDF) và ảnh QR Code thanh toán
+  Mail-->>Patient: Nhận Email hóa đơn & VietQR code
+
+  %% Bước 2: Kết thúc khám
+  Doctor->>Client: Click "Kết thúc khám bệnh"
+  Client->>Server: Gửi POST /api/update-medical-appointment-status
+  Server->>DB: Cập nhật trạng thái Booking (Trạng thái: S6 - Chờ thanh toán)
+
+  %% Bước 3: Thanh toán tự động qua VietQR
+  Patient->>Bank: Quét QR trên Email & Thực hiện chuyển khoản qua App Bank
   Bank->>Casso: Thông báo biến động số dư (qua SMS/API)
-  Casso->>Server: Gọi Webhook POST /api/casso/webhook (Gửi thông tin giao dịch)
-  Server->>DB: Đối chiếu cú pháp giao dịch -> Cập nhật trạng thái Booking (Trạng thái: PAID)
+  Casso->>Server: Gọi Webhook POST /api/casso/webhook (Thông tin giao dịch)
+  Server->>DB: Đối chiếu cú pháp BOOKING[id] -> Cập nhật trạng thái (Trạng thái: S5 - Đã thanh toán)
+  Server->>Mail: Gửi Email xác nhận thanh toán thành công
   Server-->>Client: Realtime đồng bộ giao diện qua Socket.io (Đã Thanh Toán)
 ```
 
