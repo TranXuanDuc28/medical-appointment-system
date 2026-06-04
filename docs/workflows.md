@@ -201,7 +201,6 @@ sequenceDiagram
 Cách hệ thống lọc ý định câu hỏi y học và truy xuất tài liệu trước khi trả lời.
 
 ```mermaid
-mermaid
 graph TD
   Start(["Người dùng nhập câu hỏi"]) --> PhoBERT{"Bộ lọc PhoBERT<br>(Medical Intent Classifier)"}
   
