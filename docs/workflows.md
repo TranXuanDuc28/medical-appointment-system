@@ -27,12 +27,69 @@ sequenceDiagram
   %% Đăng nhập
   Note over User, Client: Quy trình Đăng nhập
   User->>Client: Nhập Email & Mật khẩu
-  Client->>Server: Gửi POST /api/login
-  Server->>DB: Kiểm tra Email tồn tại & So sánh Hash mật khẩu
-  DB-->>Server: Trả về thông tin User
-  Server-->>Server: Tạo JWT Access Token & Refresh Token
-  Server-->>Client: Trả về JWT token & Thông tin Role (Bệnh nhân/Bác sĩ/Admin)
-  Client->>Client: Lưu JWT vào Cookie/LocalStorage & phân quyền Router
+  alt Đăng nhập Hệ thống (Admin/Doctor/Cashier...)
+    Client->>Server: Gửi POST /api/login
+    Server->>DB: Kiểm tra tài khoản & Lấy Roles, Group
+    DB-->>Server: Trả về thông tin User
+    Server-->>Server: Tạo Access Token (jwt) & Refresh Token (refreshToken)
+    Server-->>Client: Trả về JWT Token & Thiết lập Cookies (HttpOnly)
+  else Đăng nhập Chatbot (Patient)
+    Client->>Server: Gửi POST /api/login-patient-chat
+    Server->>DB: Kiểm tra tài khoản & Lấy Roles, Group (roleId === 'R3')
+    DB-->>Server: Trả về thông tin Patient
+    Server-->>Server: Tạo Access Token (jwt) & Refresh Token (refreshToken)
+    Server-->>Client: Trả về JWT Token & Thiết lập Cookies (HttpOnly)
+  end
+  Client->>Client: Đồng bộ thông tin người dùng vào Redux
+```
+
+### 1.1. Luồng Tự động Gia hạn Token (Auto Refresh Token Flow)
+Mô tả cơ chế Axios Interceptor ở Frontend tự động bắt lỗi khi Access Token (`jwt`) hết hạn, ngầm gọi API làm mới token từ `refreshToken` cookie để tiếp tục thực hiện request mà người dùng không hay biết.
+
+```mermaid
+sequenceDiagram
+  participant Client as ReactJS Frontend (Axios)
+  participant Server as NodeJS Backend
+  participant DB as MySQL Database
+
+  Client->>Server: Gửi yêu cầu API cần xác thực (ví dụ: /api/get-patient-appointments)
+  Server->>Server: Kiểm tra 'jwt' cookie (đã hết hạn sau 15 phút)
+  Server-->>Client: Trả về lỗi 401 Unauthorized
+
+  Note over Client, Server: Axios Response Interceptor tự động bắt lỗi 401
+  Client->>Server: Gọi POST /api/refresh-token (gửi kèm 'refreshToken' cookie)
+  Server->>Server: Kiểm tra 'refreshToken' cookie (hợp lệ 7 ngày)
+  Server->>DB: Lấy thông tin tài khoản người dùng từ Email
+  DB-->>Server: Trả về thông tin User mới nhất
+  Server->>Server: Tạo mới Access Token 'jwt' (15 phút)
+  Server-->>Client: Trả về HTTP-only Cookie 'jwt' mới & mã hóa thành công
+  
+  Note over Client: Axios tự động gửi lại request ban đầu
+  Client->>Server: Gửi lại request /api/get-patient-appointments
+  Server->>Server: Kiểm tra 'jwt' cookie mới (hợp lệ)
+  Server-->>Client: Trả về dữ liệu thành công cho người dùng
+```
+
+### 1.2. Luồng đăng ký Token Thông báo đẩy Firebase (FCM Token Registration)
+Mô tả quy trình trình duyệt xin quyền hiển thị thông báo, nhận FCM token từ máy chủ Firebase và gửi lên backend lưu vào cơ sở dữ liệu.
+
+```mermaid
+sequenceDiagram
+  actor Patient as Bệnh nhân
+  participant Client as ReactJS Frontend
+  participant Firebase as Firebase Cloud Messaging
+  participant Server as NodeJS Backend
+  participant DB as MySQL Database
+
+  Patient->>Client: Đăng nhập thành công vào hệ thống
+  Client->>Patient: Hiển thị hộp thoại xin quyền hiển thị thông báo (Notification Permission)
+  Patient-->>Client: Đồng ý (Granted)
+  Client->>Firebase: Gọi getToken() đăng ký thiết bị nhận tin
+  Firebase-->>Client: Trả về FCM Registration Token (Độc bản cho thiết bị)
+  Client->>Server: Gửi POST /api/save-fcm-token (userId, fcmToken)
+  Server->>DB: UPDATE cột fcmToken cho bản ghi User tương ứng
+  DB-->>Server: Thành công
+  Server-->>Client: Phản hồi 200 OK (Save FCM Token succeed)
 ```
 
 ### 2. Tìm kiếm & Đặt lịch khám (Search & Booking)
@@ -112,7 +169,13 @@ sequenceDiagram
   Casso->>Server: Gọi Webhook POST /api/casso/webhook (Thông tin giao dịch)
   Server->>DB: Đối chiếu cú pháp BOOKING[id] -> Cập nhật trạng thái (Trạng thái: S5 - Đã thanh toán)
   Server->>Mail: Gửi Email xác nhận thanh toán thành công
-  Server-->>Client: Realtime đồng bộ giao diện qua Socket.io (Đã Thanh Toán)
+  Server-->>Client: Realtime đồng bộ qua Socket.io (PAYMENT_CONFIRMED)
+  alt Bệnh nhân đăng ký FCM Token (Offline/App đóng)
+    Server->>Firebase: Gửi Push Notification qua Firebase Admin SDK
+    Firebase-->>Patient: Hiển thị Popup Thông báo đẩy trên thiết bị di động/trình duyệt
+  else Bệnh nhân đang mở App (Online/Foreground)
+    Server-->>Client: Socket.io đồng bộ giao diện & Hiện toast.info
+  end
 ```
 
 ### 5. Khảo sát & Đánh giá sức khỏe (Health Assessment Flow)
@@ -182,27 +245,33 @@ sequenceDiagram
 
 ## 💬 III. Nhóm Giao tiếp Realtime (Real-time Messaging)
 
-### 8. Chat Real-time giữa Bệnh nhân và Bác sĩ/Tư vấn viên (Socket.io Chat)
+### 8. Chat Real-time giữa Bệnh nhân và Bác sĩ (Socket.io Chat)
 Quy trình trao đổi trực tuyến và lưu trữ lịch sử tin nhắn.
 
 ```mermaid
 sequenceDiagram
   actor Patient as Bệnh nhân
-  actor Doctor as Bác sĩ/Tư vấn viên
+  actor Doctor as Bác sĩ
   participant ClientP as Client Bệnh nhân
   participant Socket as Socket.io Server (NodeJS)
   participant ClientD as Client Bác sĩ
-  participant Server as NodeJS Backend
   participant DB as MySQL Database
 
-  Patient->>ClientP: Nhập tin nhắn & Nhấn gửi
-  ClientP->>Socket: Emit sự kiện "send_message" (senderId, receiverId, content)
-  Socket->>ClientD: Emit realtime "receive_message" nếu Bác sĩ online
-  ClientP->>Server: Gọi POST /api/save-msg (Lưu lịch sử tin nhắn)
-  Server->>DB: INSERT bản ghi tin nhắn mới vào database
-  Doctor->>ClientD: Nhập phản hồi & Nhấn gửi
-  ClientD->>Socket: Emit sự kiện "send_message"
-  Socket->>ClientP: Emit realtime "receive_message"
+  %% Kết nối & Đăng ký online
+  Note over ClientP, Socket: Kết nối Socket & Đăng ký online
+  ClientP->>Socket: Emit "ADD_USER" (patientInfo)
+  ClientD->>Socket: Emit "ADD_USER" (doctorInfo)
+  Socket-->>ClientP: Emit "USER_ADDED" (Danh sách online)
+  Socket-->>ClientD: Emit "USER_ADDED" (Danh sách online)
+
+  %% Gửi tin nhắn
+  Note over Patient, ClientP: Gửi tin nhắn từ Bệnh nhân
+  Patient->>ClientP: Nhập tin nhắn & Click Gửi
+  ClientP->>Socket: Emit "SEND_MSG" (data: { msg, sender, receiver })
+  Socket->>DB: Lưu tin nhắn qua service saveMsg()
+  DB-->>Socket: Trả về tin nhắn đã lưu (kèm id, createdAt)
+  Socket-->>ClientP: Emit "RECEIVED_MSG" (tin nhắn đã lưu)
+  Socket-->>ClientD: Emit "RECEIVED_MSG" (tin nhắn đã lưu)
 ```
 
 ---
