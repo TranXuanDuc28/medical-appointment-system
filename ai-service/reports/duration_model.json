@@ -1,0 +1,232 @@
+{
+  "version": "20261112-1d315e5e",
+  "label": "synthetic",
+  "chosen": "XGBoost (log)",
+  "results": {
+    "Baseline: cố định 15 phút (hàng đợi hiện tại)": {
+      "mae": 6.474,
+      "rmse": 9.29,
+      "r2": -0.0817,
+      "median_ae": 4.77,
+      "p90_abs_error": 13.63,
+      "within_5_min": 0.522,
+      "within_10_min": 0.8304,
+      "n": 5985
+    },
+    "Baseline: trung bình theo khoa": {
+      "mae": 5.768,
+      "rmse": 8.034,
+      "r2": 0.191,
+      "median_ae": 4.483,
+      "p90_abs_error": 11.382,
+      "within_5_min": 0.5489,
+      "within_10_min": 0.8613,
+      "n": 5985
+    },
+    "Baseline: trung bình lịch sử của bác sĩ": {
+      "mae": 5.691,
+      "rmse": 8.064,
+      "r2": 0.185,
+      "median_ae": 4.3,
+      "p90_abs_error": 11.888,
+      "within_5_min": 0.5741,
+      "within_10_min": 0.8596,
+      "n": 5985
+    },
+    "Ridge (log)": {
+      "mae": 3.432,
+      "rmse": 5.36,
+      "r2": 0.6399,
+      "median_ae": 2.358,
+      "p90_abs_error": 7.211,
+      "within_5_min": 0.8013,
+      "within_10_min": 0.952,
+      "n": 5985
+    },
+    "Random Forest (log)": {
+      "mae": 3.327,
+      "rmse": 5.22,
+      "r2": 0.6585,
+      "median_ae": 2.263,
+      "p90_abs_error": 7.051,
+      "within_5_min": 0.809,
+      "within_10_min": 0.9561,
+      "n": 5985
+    },
+    "XGBoost (log)": {
+      "mae": 3.146,
+      "rmse": 5.023,
+      "r2": 0.6838,
+      "median_ae": 2.102,
+      "p90_abs_error": 6.547,
+      "within_5_min": 0.8264,
+      "within_10_min": 0.9601,
+      "n": 5985
+    },
+    "XGBoost (log, tinh chỉnh)": {
+      "mae": 3.136,
+      "rmse": 5.013,
+      "r2": 0.6851,
+      "median_ae": 2.113,
+      "p90_abs_error": 6.533,
+      "within_5_min": 0.8296,
+      "within_10_min": 0.9601,
+      "n": 5985
+    }
+  },
+  "cv_mae": {
+    "Baseline: cố định 15 phút (hàng đợi hiện tại)": [
+      6.262070431666736,
+      0.06099933912008939
+    ],
+    "Baseline: trung bình theo khoa": [
+      5.6759004048740085,
+      0.0567191582889117
+    ],
+    "Baseline: trung bình lịch sử của bác sĩ": [
+      5.539351011986647,
+      0.06398328829488908
+    ],
+    "Ridge (log)": [
+      3.3899307517068316,
+      0.03543634515095278
+    ],
+    "Random Forest (log)": [
+      3.305441863188688,
+      0.048341787659689814
+    ],
+    "XGBoost (log)": [
+      3.137406189093313,
+      0.04204011871827197
+    ],
+    "XGBoost (log, tinh chỉnh)": [
+      3.126108247506692,
+      null
+    ]
+  },
+  "mae_ci": [
+    3.049853206920544,
+    3.245257548425829
+  ],
+  "coverage": 0.8041771094402673,
+  "q": [
+    -0.27697449759849846,
+    0.2752372746901659
+  ],
+  "eta": {
+    "Baseline: cố định 15 phút (hàng đợi hiện tại)": {
+      "mae_overall": 22.74,
+      "p90": 54.5,
+      "within_10": 0.387,
+      "by_position": {
+        "vị trí 2–4": 9.93,
+        "vị trí 5–8": 23.28,
+        "vị trí ≥9": 38.4
+      },
+      "n": 5385,
+      "improvement_vs_reference_pct": 0.0
+    },
+    "Trung bình theo khoa": {
+      "mae_overall": 14.49,
+      "p90": 33.29,
+      "within_10": 0.494,
+      "by_position": {
+        "vị trí 2–4": 8.27,
+        "vị trí 5–8": 15.21,
+        "vị trí ≥9": 21.4
+      },
+      "n": 5385,
+      "improvement_vs_reference_pct": 36.3
+    },
+    "Trung bình lịch sử của bác sĩ": {
+      "mae_overall": 14.13,
+      "p90": 32.78,
+      "within_10": 0.517,
+      "by_position": {
+        "vị trí 2–4": 7.78,
+        "vị trí 5–8": 14.66,
+        "vị trí ≥9": 21.5
+      },
+      "n": 5385,
+      "improvement_vs_reference_pct": 37.9
+    },
+    "ML: XGBoost (log)": {
+      "mae_overall": 7.79,
+      "p90": 17.98,
+      "within_10": 0.746,
+      "by_position": {
+        "vị trí 2–4": 4.33,
+        "vị trí 5–8": 8.23,
+        "vị trí ≥9": 11.55
+      },
+      "n": 5385,
+      "improvement_vs_reference_pct": 65.7
+    }
+  },
+  "importance": [
+    {
+      "feature": "visit_type",
+      "mae_increase": 2.028
+    },
+    {
+      "feature": "severity",
+      "mae_increase": 1.792
+    },
+    {
+      "feature": "doctor_hist_avg_min",
+      "mae_increase": 1.097
+    },
+    {
+      "feature": "department",
+      "mae_increase": 0.946
+    },
+    {
+      "feature": "age",
+      "mae_increase": 0.679
+    },
+    {
+      "feature": "chronic_count",
+      "mae_increase": 0.44
+    },
+    {
+      "feature": "source",
+      "mae_increase": 0.193
+    },
+    {
+      "feature": "queue_length",
+      "mae_increase": 0.134
+    },
+    {
+      "feature": "doctor_experience_years",
+      "mae_increase": 0.072
+    },
+    {
+      "feature": "hour_of_day",
+      "mae_increase": 0.019
+    }
+  ],
+  "by_sev": {
+    "MILD": 2.72,
+    "MODERATE": 3.13,
+    "SEVERE": 4.34
+  },
+  "by_dep": {
+    "musculoskeletal": 2.72,
+    "neurology": 4.1,
+    "digestive": 2.76,
+    "cardiology": 4.0,
+    "ent": 1.98,
+    "spine": 3.23,
+    "respiratory": 2.86,
+    "dentistry": 3.74
+  },
+  "n_rows": 29874,
+  "n_sessions": 3000,
+  "n_train": 23889,
+  "n_test": 5985,
+  "best_params": {
+    "regressor__m__learning_rate": 0.06,
+    "regressor__m__max_depth": 3,
+    "regressor__m__n_estimators": 400
+  }
+}

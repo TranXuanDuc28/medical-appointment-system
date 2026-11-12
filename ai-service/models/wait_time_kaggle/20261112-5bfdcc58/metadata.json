@@ -1,0 +1,56 @@
+{
+  "kind": "wait_time_kaggle",
+  "version": "20261112-5bfdcc58",
+  "trained_at": "2026-11-12T09:01:28+00:00",
+  "purpose": "nghiên cứu: dự đoán thời gian chờ trên dataset Kaggle (KHÔNG dùng cho ETA của hàng đợi)",
+  "selection_rule": "mô hình đơn giản nhất trong ngưỡng 0,5% so với MAE thấp nhất",
+  "algorithm": "Baseline: trung bình theo mức nặng",
+  "dataset_sha256_12": "8d9fa1bba8f3",
+  "n_rows": 10000,
+  "seed": 42,
+  "features": [
+    "gender",
+    "city",
+    "chronic_disease",
+    "appointment_type",
+    "department",
+    "severity_level",
+    "insurance",
+    "appointment_day",
+    "appointment_month",
+    "age",
+    "bmi",
+    "doctor_experience_years",
+    "consultation_fee",
+    "booking_to_appointment_days",
+    "previous_appointments",
+    "missed_previous_appointments",
+    "hospital_rating",
+    "emergency_case"
+  ],
+  "excluded_leaky": [
+    "patient_satisfaction_score",
+    "total_bill",
+    "medicine_cost",
+    "test_cost",
+    "appointment_status"
+  ],
+  "metrics_test": {
+    "mae": 7.732,
+    "rmse": 9.193,
+    "r2": 0.6354,
+    "median_ae": 7.032,
+    "p90_abs_error": 14.651,
+    "within_5_min": 0.35,
+    "within_10_min": 0.703,
+    "n": 2000
+  },
+  "baseline_mae": 12.815,
+  "improvement_vs_mean_baseline_pct": 39.7,
+  "best_params": {
+    "m__learning_rate": 0.03,
+    "m__max_depth": 2,
+    "m__min_child_weight": 20,
+    "m__n_estimators": 150
+  }
+}
