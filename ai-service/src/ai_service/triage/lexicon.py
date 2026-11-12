@@ -1,0 +1,176 @@
+"""Từ vựng triệu chứng tiếng Việt do NHÓM TỰ XÂY (không phải dữ liệu lâm sàng đã kiểm định).
+
+Nguồn: kiến thức y khoa phổ thông về triệu chứng thường gặp của từng chuyên khoa. Nhãn = khoá chuyên khoa của hệ thống
+(`ai_service.duration.schema.DEPARTMENTS`). Một số triệu chứng thuộc nhiều khoa (vd. đau lưng lan xuống chân: Cột sống/Thần kinh);
+mô hình trả về top-3 để người dùng chọn, không khẳng định chẩn đoán.
+"""
+from __future__ import annotations
+
+# Mỗi cụm là một "triệu chứng gốc". Bộ sinh dữ liệu (build_dataset.py) biến mỗi cụm thành nhiều câu nói tự nhiên.
+SYMPTOMS: dict[str, list[str]] = {
+    "musculoskeletal": [
+        "đau khớp gối khi đi lại", "sưng đau các khớp ngón tay", "cứng khớp vào buổi sáng", "đau khớp háng khi đứng lên",
+        "đau vai không giơ tay lên được", "đau khuỷu tay khi xách đồ", "đau cổ tay khi cầm nắm", "đau gót chân khi bước xuống giường",
+        "bong gân cổ chân sưng bầm", "đau nhức xương kéo dài", "ngón chân cái sưng đỏ đau dữ dội", "đau bắp chân và chuột rút",
+        "đau mỏi cơ toàn thân", "khớp gối kêu lục cục khi gập", "tràn dịch khớp gối sưng to", "thoái hóa khớp gối đau nhiều",
+        "khó co duỗi các ngón tay", "đau mỏi cơ sau khi tập thể thao", "loãng xương hay đau xương", "đau mắt cá chân sau khi té",
+        "viêm khớp dạng thấp sưng nóng khớp", "đau khớp vai về đêm", "đau khớp cùng hai bên", "căng cứng cơ đùi",
+        "đau nhói ở khớp khuỷu khi gập", "gai xương gót chân đau", "khớp ngón tay biến dạng", "đau nhức xương khớp khi trở trời",
+    ],
+    "neurology": [
+        "đau đầu dữ dội kéo dài", "đau nửa đầu kèm buồn nôn", "chóng mặt quay cuồng", "mất ngủ kéo dài nhiều tuần",
+        "tê bì chân tay", "run tay khi cầm đồ", "hay quên và giảm trí nhớ", "tê một bên mặt", "hoa mắt thoáng qua",
+        "đau đầu vùng chẩm", "đi đứng loạng choạng mất thăng bằng", "đau đầu sau va chạm", "giật mí mắt liên tục",
+        "đau nhói như điện giật bên mặt", "rối loạn giấc ngủ hay thức giấc", "đau đầu căng thẳng vùng thái dương",
+        "tay chân run nhẹ khi nghỉ", "hay bị chóng mặt khi đứng dậy", "tê ngón tay về đêm", "mệt mỏi đau đầu mất tập trung",
+        "ngủ không sâu giấc hay mơ", "choáng váng khi ngồi dậy đột ngột", "đau đầu từng cơn dồn dập một bên", "cảm giác kiến bò ở chân",
+        "nói chuyện hay lẫn lộn từ", "đau đầu kèm sợ ánh sáng", "tê rần cánh tay không rõ nguyên nhân", "run giật cơ ở đùi",
+    ],
+    "digestive": [
+        "đau bụng vùng thượng vị", "ợ chua và nóng rát sau xương ức", "buồn nôn và nôn", "tiêu chảy kéo dài", "táo bón nhiều ngày",
+        "đầy hơi chướng bụng sau ăn", "đau bụng bên phải phía dưới", "khó nuốt thức ăn", "chán ăn sụt cân", "vàng da vàng mắt",
+        "đau bụng quặn từng cơn", "đau hạ sườn phải", "đi cầu ra máu tươi", "viêm loét dạ dày đau khi đói", "rối loạn tiêu hóa hay đau bụng",
+        "đau bụng sau khi ăn đồ dầu mỡ", "buồn nôn vào buổi sáng", "nghi ngộ độc thực phẩm đau bụng đi ngoài", "ợ hơi nhiều khó tiêu",
+        "phân lỏng nhiều lần trong ngày", "cảm giác nghẹn khi nuốt", "đau bụng âm ỉ vùng rốn", "trĩ đau rát khi đi vệ sinh",
+        "hay bị trào ngược dạ dày", "bụng sôi òng ọc đi ngoài phân sống", "đau bụng kèm sốt và tiêu chảy", "ăn không tiêu nặng bụng",
+        "nóng rát dạ dày về đêm",
+    ],
+    "cardiology": [
+        "tim đập nhanh hồi hộp", "khó thở khi leo cầu thang", "huyết áp cao đau đầu", "phù hai mắt cá chân", "tim đập không đều",
+        "hay chóng mặt do huyết áp thấp", "mệt khi gắng sức nhẹ", "tức nặng ngực khi đi nhanh", "đánh trống ngực khi lo lắng",
+        "kiểm tra tim mạch định kỳ", "mỡ máu cao cần khám tim", "nằm xuống thì khó thở phải gối cao đầu", "tim đập chậm hay mệt",
+        "đau ngực trái khi vận động", "bàn chân sưng phù về chiều", "nhịp tim loạn khi uống cà phê", "huyết áp dao động thất thường",
+        "đau ngực kèm vã mồ hôi", "hụt hơi khi làm việc nặng", "thấy hồi hộp vào ban đêm", "khám sức khỏe tim vì có tiền sử gia đình",
+        "tê tay trái kèm tức ngực", "chân tay lạnh tím tái khi gắng sức", "choáng khi huyết áp tụt", "bị cao huyết áp lâu năm cần tái khám",
+        "nặng ngực khó thở nhẹ", "tim đập mạnh khi nằm", "phù chân kèm mệt tim",
+    ],
+    "ent": [
+        "đau họng khi nuốt", "ngạt mũi kéo dài", "chảy nước mũi liên tục", "đau nhức vùng mặt do viêm xoang", "ù tai một bên",
+        "đau tai chảy mủ", "nghe kém một bên tai", "khàn tiếng mất giọng", "viêm amidan sưng đau", "chảy máu cam hay tái phát",
+        "hắt hơi ngứa mũi do dị ứng", "ngáy to và ngưng thở khi ngủ", "dị vật trong tai", "sưng hạch ở cổ", "mất khứu giác",
+        "đau họng kèm sốt nhẹ", "cảm giác vướng ở cổ họng", "nghẹt mũi về đêm khó ngủ", "viêm họng hay tái đi tái lại",
+        "đau tai sau khi bơi", "tai ù như có tiếng ve kêu", "chóng mặt kèm ù tai", "mũi có mùi hôi chảy dịch vàng",
+        "khô rát cổ họng buổi sáng", "đau tai khi nhai", "viêm mũi dị ứng quanh năm", "ngứa trong tai", "polyp mũi nghẹt một bên",
+    ],
+    "spine": [
+        "đau thắt lưng kéo dài", "đau lưng lan xuống chân", "thoát vị đĩa đệm", "đau cổ vai gáy cứng cổ", "gù lưng hay mỏi lưng",
+        "vẹo cột sống ở trẻ", "tê chân lan từ thắt lưng", "đau dây thần kinh tọa", "cứng cột sống buổi sáng", "đau lưng khi cúi xuống",
+        "đau lưng sau khi mang vác nặng", "đau cột sống ngực giữa hai bả vai", "hẹp ống sống lưng đau khi đi bộ", "đau mỏi lưng khi ngồi lâu",
+        "đau xương cụt khi ngồi", "tê bì tay do thoái hóa đốt sống cổ", "đau lưng dưới khi ngủ dậy", "đau cột sống thắt lưng về đêm",
+        "đau lưng như bị châm chích lan ra mông", "đau cổ lan xuống vai và cánh tay", "ưỡn lưng thì đau nhói", "lưng đau không cúi người được",
+        "vẹo cổ đau khi xoay đầu", "đau thắt lưng sau khi nâng vật nặng", "thoái hóa đốt sống cổ chóng mặt tê tay", "đau lưng kèm tê mông và đùi",
+    ],
+    "respiratory": [
+        "ho kéo dài nhiều tuần", "ho ra máu", "khó thở thở khò khè", "tức ngực khi ho", "ho khan về đêm", "sốt ho đờm vàng xanh",
+        "hen suyễn lên cơn", "viêm phế quản ho nhiều", "đau ngực khi hít sâu", "ho có đờm đặc", "thở nhanh nông", "cảm cúm ho kéo dài không khỏi",
+        "ho dai dẳng sau khi khỏi covid", "thở rít khi gắng sức", "viêm phổi sốt cao ho đờm", "ho nhiều vào sáng sớm do hút thuốc lá",
+        "nặng ngực khó thở khi nằm", "ho đờm lẫn máu", "khò khè ở trẻ nhỏ", "hơi thở ngắn khi đi bộ nhanh", "ho từng cơn dài không thở được",
+        "đau tức ngực khi hít thở mạnh", "khạc đờm nhiều mỗi sáng", "viêm họng ho sâu xuống ngực", "ho khan kéo dài do dị ứng",
+        "thở nặng nhọc khi trời lạnh", "ngạt thở về đêm phải ngồi dậy", "bệnh phổi tắc nghẽn mạn tính khó thở",
+    ],
+    "dentistry": [
+        "đau răng dữ dội", "sâu răng ăn đồ ngọt đau", "chảy máu chân răng khi đánh răng", "sưng nướu đau", "răng khôn mọc gây đau",
+        "răng ê buốt khi uống nước lạnh", "hôi miệng kéo dài", "mẻ răng sau khi cắn đồ cứng", "mất răng muốn làm răng giả",
+        "muốn niềng răng chỉnh nha", "cao răng nhiều cần lấy", "viêm lợi sưng đỏ", "áp xe răng sưng má", "cần nhổ răng sâu",
+        "cần trám răng bị lỗ", "muốn tẩy trắng răng", "loét miệng đau khi ăn", "đau hàm khi nhai", "răng lung lay",
+        "răng hô cần chỉnh", "đau răng về đêm không ngủ được", "viêm tủy răng đau nhức", "răng bị gãy do va đập", "nướu tụt lộ chân răng",
+        "đau tai do răng khôn", "răng bị đổi màu ố vàng", "miệng có mùi hôi và lợi chảy máu", "bọc răng sứ",
+    ],
+}
+
+# Cụm cố ý ghi nhãn theo ngữ cảnh THỰC TẾ để kiểm tra tính khái quát: câu nói tự nhiên, viết tay, KHÔNG sinh từ khuôn mẫu ở trên.
+# Dùng làm tập kiểm tra độc lập (external test) – không bao giờ đưa vào huấn luyện.
+EXTERNAL_TEST: list[tuple[str, str]] = [
+    ("Mấy hôm nay đầu gối tôi sưng lên, đi cầu thang là đau", "musculoskeletal"),
+    ("Sáng ngủ dậy các ngón tay cứng đờ phải xoa bóp mới cử động được", "musculoskeletal"),
+    ("Vai trái của mình nhức, giơ lên cao là buốt", "musculoskeletal"),
+    ("Ngón chân cái sưng tấy đỏ rực sau bữa nhậu", "musculoskeletal"),
+    ("Chơi bóng đá bị lật cổ chân, giờ sưng to đi không nổi", "musculoskeletal"),
+    ("Hai bàn tay tôi nhức, khớp nào cũng nóng và sưng", "musculoskeletal"),
+    ("Gót chân đau nhói mỗi sáng bước xuống giường", "musculoskeletal"),
+    ("Ba tôi lớn tuổi, khớp gối lúc nào cũng kêu và đau", "musculoskeletal"),
+    ("Tôi hay bị đau đầu một bên, kèm buồn nôn, nhìn đèn là khó chịu", "neurology"),
+    ("Mấy tuần nay tôi trằn trọc không ngủ được, ban ngày thì mệt rã rời", "neurology"),
+    ("Bàn tay tôi hay run, cầm ly nước cũng đổ", "neurology"),
+    ("Dạo này em hay quên, vừa nói xong đã không nhớ", "neurology"),
+    ("Đứng dậy nhanh là choáng, tối sầm cả mắt", "neurology"),
+    ("Chân tôi tê như kiến bò, nhất là buổi tối", "neurology"),
+    ("Một bên mặt tôi đau như điện giật mỗi khi nhai", "neurology"),
+    ("Cứ đau đầu âm ỉ hai bên thái dương mỗi chiều làm việc căng thẳng", "neurology"),
+    ("Tôi bị nóng rát ở ngực sau khi ăn, nằm xuống là càng khó chịu", "digestive"),
+    ("Bụng đau thượng vị, đói là đau, ăn vào đỡ", "digestive"),
+    ("Em bị tiêu chảy cả tuần nay, đi ngoài mấy lần một ngày", "digestive"),
+    ("Mấy ngày rồi không đi cầu được, bụng chướng căng", "digestive"),
+    ("Ăn xong là đầy bụng, ợ hơi liên tục", "digestive"),
+    ("Mắt và da mẹ tôi vàng dần, ăn không ngon", "digestive"),
+    ("Tối qua ăn hải sản xong đau bụng, nôn mấy lần", "digestive"),
+    ("Đi vệ sinh bị đau rát và có máu dính giấy", "digestive"),
+    ("Tim em đập thình thịch, hồi hộp mà không biết vì sao", "cardiology"),
+    ("Leo hai tầng cầu thang là hụt hơi, phải dừng nghỉ", "cardiology"),
+    ("Huyết áp của bố tôi đo ra 170, hay nhức đầu", "cardiology"),
+    ("Chiều nào chân cũng sưng phù, ấn lõm xuống", "cardiology"),
+    ("Tôi thấy tim đập lúc nhanh lúc chậm, có lúc hẫng", "cardiology"),
+    ("Mẹ tôi bị tiểu đường, bác sĩ dặn đi khám tim mạch định kỳ", "cardiology"),
+    ("Ngực tôi nặng như có đá đè khi đi bộ nhanh", "cardiology"),
+    ("Đêm nằm thấy khó thở phải kê cao gối mới ngủ được", "cardiology"),
+    ("Cổ họng tôi đau rát, nuốt nước bọt cũng đau", "ent"),
+    ("Mũi bị nghẹt cả tuần, chảy dịch vàng, đau nhức vùng trán", "ent"),
+    ("Tai trái tôi ù như tiếng ve kêu mấy hôm nay", "ent"),
+    ("Con tôi hay chảy máu cam vào ban đêm", "ent"),
+    ("Giọng tôi khàn đặc, nói chuyện khó khăn mấy ngày rồi", "ent"),
+    ("Em bị hắt hơi liên tục mỗi sáng, ngứa mũi chảy nước trong", "ent"),
+    ("Hai bên amidan sưng to, nuốt rất đau", "ent"),
+    ("Tai tôi chảy nước vàng và nghe kém hẳn", "ent"),
+    ("Lưng dưới của tôi đau, cúi xuống là nhói", "spine"),
+    ("Đau từ thắt lưng lan xuống mông rồi xuống bắp chân", "spine"),
+    ("Cổ vai gáy tôi cứng đơ, xoay đầu không được", "spine"),
+    ("Bác sĩ chụp phim nói tôi bị thoát vị đĩa đệm", "spine"),
+    ("Ngồi văn phòng cả ngày, tối về lưng mỏi rã", "spine"),
+    ("Con gái tôi đi đứng bị lệch vai, nghi vẹo cột sống", "spine"),
+    ("Sáng dậy lưng cứng, phải một lúc mới cử động được", "spine"),
+    ("Tay tôi tê bì kèm đau lan từ cổ xuống cánh tay", "spine"),
+    ("Tôi ho mãi không khỏi, ban đêm ho nhiều hơn", "respiratory"),
+    ("Thở khò khè, lên cơn hen mỗi khi trở trời", "respiratory"),
+    ("Ho đờm đặc màu vàng, kèm sốt mấy ngày nay", "respiratory"),
+    ("Hít thở sâu là đau nhói bên ngực phải", "respiratory"),
+    ("Bố tôi hút thuốc nhiều năm, sáng nào cũng ho khạc đờm", "respiratory"),
+    ("Con em thở rít, khò khè mỗi khi chạy nhảy", "respiratory"),
+    ("Sau khi khỏi covid tôi vẫn ho và mau mệt", "respiratory"),
+    ("Tôi hụt hơi, thở nặng nhọc khi gặp lạnh", "respiratory"),
+    ("Răng hàm của tôi nhức buốt, nhai không được", "dentistry"),
+    ("Mỗi lần đánh răng là chảy máu, nướu sưng đỏ", "dentistry"),
+    ("Răng khôn mọc lệch gây sưng đau cả bên má", "dentistry"),
+    ("Uống nước đá là răng ê buốt", "dentistry"),
+    ("Tôi muốn lấy cao răng và tẩy trắng", "dentistry"),
+    ("Con tôi bị sún răng, răng sâu đen cả hàm", "dentistry"),
+    ("Răng cửa bị mẻ sau khi té", "dentistry"),
+    ("Miệng tôi hôi và lợi hay mưng mủ", "dentistry"),
+]
+
+# ---- Dấu hiệu CẤP CỨU / KHẨN: luật cứng chạy TRƯỚC mô hình, ưu tiên an toàn (thà báo nhầm còn hơn bỏ sót) ----
+# Mỗi mục: (nhãn, [biểu thức chính quy trên văn bản đã bỏ dấu, viết thường])
+EMERGENCY_PATTERNS: list[tuple[str, list[str]]] = [
+    ("Đau ngực nghi nhồi máu cơ tim", [r"dau (that )?nguc.*(du doi|lan|vai|ham|canh tay|mo hoi|kho tho)", r"dau that nguc", r"nguc.*(nhu bi|nhu co|nhu da).*(de|bop|ep)", r"(tuc|nang) nguc.*(va mo hoi|vi mo hoi|kho tho nhieu)"]),
+    ("Khó thở nặng / ngạt thở", [r"(kho tho|tho).*(du doi|dot ngot|khong tho duoc|tim tai|nghet tho)", r"kho tho (rat )?nang", r"khong tho duoc", r"nghet tho", r"ngat tho", r"tim tai"]),
+    ("Nghi đột quỵ", [r"meo (mieng|mom)", r"liet (nua nguoi|mot ben|tay chan)", r"(yeu|te) (dot ngot|mot ben).*(tay|chan|mat|nguoi)", r"noi (ngong|kho|lan) dot ngot", r"dot ngot.*(noi ngong|khong noi duoc|mat thang bang|mu mat)"]),
+    ("Co giật / mất ý thức", [r"co giat", r"len con (dong kinh|co giat)", r"bat tinh", r"ngat (xiu|di)\b", r"hon me", r"mat y thuc", r"khong tinh"]),
+    ("Chảy máu nặng / xuất huyết", [r"non (ra )?mau", r"ho ra nhieu mau", r"chay mau (rat )?(nhieu|o at|khong cam|khong ngung)"]),
+    ("Đau đầu dữ dội đột ngột / chấn thương đầu", [r"dau dau (du doi )?dot ngot", r"dau dau.*(du doi).*(nhat|chua tung)", r"(chan thuong|va dap|te).*dau.*(non|buon ngu|lo mo|chay mau)"]),
+    ("Đau bụng dữ dội / bụng cứng", [r"dau bung (du doi|doi|quan that).*(cung|khong chiu noi|khong cu dong)", r"bung cung nhu go"]),
+    ("Ngộ độc / dị ứng nặng", [r"ngo doc (?!thuc pham)", r"phan ve", r"sung (moi|mat|luoi|hong).*(kho tho|ngat)", r"di ung nang"]),
+    ("Ý định tự hại", [r"tu (tu|sat|hai)", r"khong muon song", r"muon chet"]),
+]
+# Mẫu cần GIỮ DẤU (vì "ngất" và "ngạt" trùng nhau khi bỏ dấu: "ngạt mũi" không phải cấp cứu)
+EMERGENCY_ACCENTED: list[tuple[str, str]] = [
+    ("Co giật / mất ý thức", r"\b(bị |vừa |đột ngột |hay )?ngất\b"),
+]
+URGENT_PATTERNS: list[tuple[str, list[str]]] = [
+    ("Sốt cao", [r"sot (cao )?(tren |tu )?(39|40|41)", r"sot cao (keo dai|khong ha|lien tuc)"]),
+    ("Khó thở đáng lo", [r"kho tho.*(khi nghi|luc nghi|khi nam|ban dem|dot ngot|nhieu|tang dan|nang)", r"tho (rit|nhanh nong)"]),
+    ("Đau ngực / tức ngực", [r"dau nguc", r"tuc nguc", r"nang nguc"]),
+    ("Chảy máu / phân đen", [r"phan den", r"(di ngoai|di cau|di vs|di tieu).{0,20}(ra mau|co mau|lan mau|mau tuoi)", r"ho (ra )?mau", r"dom (lan )?mau", r"chay mau(?! (cam|chan rang|nuou|loi|rang))"]),
+    ("Đau bụng nhiều", [r"dau bung.*(du doi|nhieu|quan)"]),
+    ("Vàng da", [r"vang (da|mat)"]),
+    ("Ngộ độc thực phẩm", [r"ngo doc thuc pham"]),
+    ("Sưng áp xe mặt kèm sốt", [r"sung (ma|mat|ham).*sot", r"ap xe.*sot"]),
+]
