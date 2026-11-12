@@ -1,0 +1,62 @@
+{
+  "kind": "duration",
+  "version": "20261112-1d315e5e",
+  "trained_at": "2026-11-12T08:51:06+00:00",
+  "purpose": "dự đoán thời lượng một ca khám (phút) cho ETA hàng đợi",
+  "data_source": "synthetic",
+  "n_rows": 29874,
+  "n_sessions": 3000,
+  "seed": 42,
+  "algorithm": "XGBoost (log)",
+  "features": [
+    "department",
+    "gender",
+    "severity",
+    "visit_type",
+    "source",
+    "age",
+    "chronic_count",
+    "doctor_experience_years",
+    "hour_of_day",
+    "queue_length",
+    "doctor_hist_avg_min"
+  ],
+  "defaults": {
+    "gender": "O",
+    "severity": "MODERATE",
+    "visit_type": "NEW",
+    "source": "BOOKED",
+    "age": 35,
+    "chronic_count": 0,
+    "doctor_experience_years": 8,
+    "hour_of_day": 9.0,
+    "queue_length": 0,
+    "doctor_hist_avg_min": null
+  },
+  "interval": {
+    "q_lo": -0.27697449759849846,
+    "q_hi": 0.2752372746901659,
+    "nominal": 0.8,
+    "coverage_test": 0.804
+  },
+  "metrics_test": {
+    "mae": 3.146,
+    "rmse": 5.023,
+    "r2": 0.6838,
+    "median_ae": 2.102,
+    "p90_abs_error": 6.547,
+    "within_5_min": 0.8264,
+    "within_10_min": 0.9601,
+    "n": 5985
+  },
+  "mae_ci95": [
+    3.05,
+    3.245
+  ],
+  "baseline_const15_mae": 6.474,
+  "improvement_vs_const15_pct": 51.4,
+  "eta_mae_const15": 22.74,
+  "eta_mae_model": 7.79,
+  "eta_improvement_pct": 65.7,
+  "warning": "Dữ liệu mô phỏng: cần tái huấn luyện từ log thật (queue_events) trước khi dùng cho vận hành thật"
+}

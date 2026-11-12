@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# Dữ liệu: chỉ commit dữ liệu do nhóm tự xây (triage). Dữ liệu Kaggle, dữ liệu mô phỏng và dữ liệu thật KHÔNG commit.
+data/raw/*
+!data/raw/README.md
+data/synthetic/*
+!data/synthetic/.gitkeep
+data/real/*
+!data/real/.gitkeep
+
+# Biến môi trường
+.env

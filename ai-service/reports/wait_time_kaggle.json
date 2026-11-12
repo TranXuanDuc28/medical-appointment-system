@@ -1,0 +1,210 @@
+{
+  "version": "20261112-5bfdcc58",
+  "best": "Baseline: trung bình theo mức nặng",
+  "best_raw": "Baseline: trung bình theo mức nặng",
+  "results": {
+    "Baseline: trung bình": {
+      "mae": 12.815,
+      "rmse": 15.234,
+      "r2": -0.0013,
+      "median_ae": 11.094,
+      "p90_abs_error": 24.094,
+      "within_5_min": 0.175,
+      "within_10_min": 0.423,
+      "n": 2000
+    },
+    "Baseline: trung vị": {
+      "mae": 12.785,
+      "rmse": 15.452,
+      "r2": -0.0302,
+      "median_ae": 11.0,
+      "p90_abs_error": 26.0,
+      "within_5_min": 0.2165,
+      "within_10_min": 0.469,
+      "n": 2000
+    },
+    "Baseline: trung bình theo mức nặng": {
+      "mae": 7.732,
+      "rmse": 9.193,
+      "r2": 0.6354,
+      "median_ae": 7.032,
+      "p90_abs_error": 14.651,
+      "within_5_min": 0.35,
+      "within_10_min": 0.703,
+      "n": 2000
+    },
+    "Linear Regression": {
+      "mae": 7.759,
+      "rmse": 9.235,
+      "r2": 0.6321,
+      "median_ae": 7.165,
+      "p90_abs_error": 15.057,
+      "within_5_min": 0.3495,
+      "within_10_min": 0.7015,
+      "n": 2000
+    },
+    "Random Forest": {
+      "mae": 7.761,
+      "rmse": 9.239,
+      "r2": 0.6317,
+      "median_ae": 7.145,
+      "p90_abs_error": 14.973,
+      "within_5_min": 0.3505,
+      "within_10_min": 0.6975,
+      "n": 2000
+    },
+    "XGBoost": {
+      "mae": 7.771,
+      "rmse": 9.25,
+      "r2": 0.6308,
+      "median_ae": 7.177,
+      "p90_abs_error": 15.008,
+      "within_5_min": 0.352,
+      "within_10_min": 0.703,
+      "n": 2000
+    },
+    "XGBoost (đã tinh chỉnh)": {
+      "mae": 7.741,
+      "rmse": 9.213,
+      "r2": 0.6338,
+      "median_ae": 7.109,
+      "p90_abs_error": 14.757,
+      "within_5_min": 0.353,
+      "within_10_min": 0.702,
+      "n": 2000
+    }
+  },
+  "cv": [
+    {
+      "model": "Baseline: trung bình",
+      "cv_mae_mean": 12.281,
+      "cv_mae_std": 0.075
+    },
+    {
+      "model": "Baseline: trung vị",
+      "cv_mae_mean": 12.217,
+      "cv_mae_std": 0.081
+    },
+    {
+      "model": "Baseline: trung bình theo mức nặng",
+      "cv_mae_mean": 7.519,
+      "cv_mae_std": 0.048
+    },
+    {
+      "model": "Linear Regression",
+      "cv_mae_mean": 7.53,
+      "cv_mae_std": 0.053
+    },
+    {
+      "model": "Random Forest",
+      "cv_mae_mean": 7.559,
+      "cv_mae_std": 0.053
+    },
+    {
+      "model": "XGBoost",
+      "cv_mae_mean": 7.566,
+      "cv_mae_std": 0.064
+    },
+    {
+      "model": "XGBoost (đã tinh chỉnh)",
+      "cv_mae_mean": 7.532,
+      "cv_mae_std": null
+    }
+  ],
+  "baseline_mae": 12.815,
+  "best_mae": 7.732,
+  "ci_best": [
+    7.527399686080145,
+    7.938027879682319
+  ],
+  "ci_base": [
+    12.466205028124998,
+    13.1650936
+  ],
+  "severity_baseline": {
+    "mae": 7.732,
+    "rmse": 9.193,
+    "r2": 0.6354,
+    "median_ae": 7.032,
+    "p90_abs_error": 14.651,
+    "within_5_min": 0.35,
+    "within_10_min": 0.703,
+    "n": 2000
+  },
+  "leak": {
+    "mae": 3.427,
+    "rmse": 4.747,
+    "r2": 0.9028,
+    "median_ae": 2.145,
+    "p90_abs_error": 8.395,
+    "within_5_min": 0.6875,
+    "within_10_min": 0.959,
+    "n": 2000
+  },
+  "importance": [
+    {
+      "feature": "severity_level",
+      "mae_increase": 8.072
+    },
+    {
+      "feature": "gender",
+      "mae_increase": 0.0
+    },
+    {
+      "feature": "city",
+      "mae_increase": 0.0
+    },
+    {
+      "feature": "chronic_disease",
+      "mae_increase": 0.0
+    },
+    {
+      "feature": "appointment_type",
+      "mae_increase": 0.0
+    },
+    {
+      "feature": "department",
+      "mae_increase": 0.0
+    },
+    {
+      "feature": "insurance",
+      "mae_increase": 0.0
+    },
+    {
+      "feature": "appointment_day",
+      "mae_increase": 0.0
+    },
+    {
+      "feature": "appointment_month",
+      "mae_increase": 0.0
+    },
+    {
+      "feature": "age",
+      "mae_increase": 0.0
+    },
+    {
+      "feature": "bmi",
+      "mae_increase": 0.0
+    },
+    {
+      "feature": "doctor_experience_years",
+      "mae_increase": 0.0
+    }
+  ],
+  "fingerprint": "8d9fa1bba8f3",
+  "best_params": {
+    "m__learning_rate": 0.03,
+    "m__max_depth": 2,
+    "m__min_child_weight": 20,
+    "m__n_estimators": 150
+  },
+  "n_rows": 10000,
+  "n_train": 8000,
+  "n_test": 2000,
+  "target_stats": {
+    "mean": 25.2,
+    "sd": 14.86,
+    "p10": 7.0,
+    "p90": 48.0
+  }
+}

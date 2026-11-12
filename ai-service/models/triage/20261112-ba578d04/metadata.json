@@ -1,0 +1,35 @@
+{
+  "kind": "triage",
+  "version": "20261112-ba578d04",
+  "trained_at": "2026-11-12T08:56:44+00:00",
+  "purpose": "gợi ý chuyên khoa từ mô tả triệu chứng tiếng Việt (KHÔNG phải chẩn đoán)",
+  "algorithm": "TF-IDF(char 2-5 + word 1-2) + LogisticRegression",
+  "classes": [
+    "cardiology",
+    "dentistry",
+    "digestive",
+    "ent",
+    "musculoskeletal",
+    "neurology",
+    "respiratory",
+    "spine"
+  ],
+  "n_rows": 3108,
+  "n_base_phrases": 222,
+  "seed": 42,
+  "best_C": 10,
+  "uncertain_threshold": 0.6,
+  "holdout": {
+    "top1": 0.7095,
+    "top3": 0.8587,
+    "macro_f1": 0.7074,
+    "n": 630
+  },
+  "external": {
+    "top1": 0.9375,
+    "top3": 0.9688,
+    "macro_f1": 0.9384,
+    "n": 64
+  },
+  "data_note": "Dữ liệu do nhóm tự xây từ kiến thức phổ thông, chưa được bác sĩ kiểm định"
+}
