@@ -1,5 +1,8 @@
 # 🏛️ Sơ đồ Lớp Tổng thể Hệ thống (UML Class Diagram)
 
+> [!WARNING]
+> **MỘT PHẦN LỖI THỜI (đánh dấu 27/11/2026).** Tài liệu mô tả hệ thống đặt lịch **trước** khi có hàng đợi, AI, nhắc hẹn và schema v2. Luồng đặt lịch/thanh toán/chat vẫn đúng ý tưởng, nhưng: tên bảng và quan hệ theo schema cũ (xem [database_schema_v2.md](database_schema_v2.md)); đặt lịch nay có **giữ chỗ có hạn + khoá dòng chống trùng**; phân quyền theo **permission** thay vì nhóm vai trò; **chưa có** luồng check-in/hàng đợi/ETA/gọi số, phân loại triệu chứng, nhắc hẹn, cân bằng tải (xem [backend/QUEUE_ENGINE.md](../backend/QUEUE_ENGINE.md), [backend/AI_INTEGRATION.md](../backend/AI_INTEGRATION.md)). Trạng thái hiện tại: [DIEU_CHINH_SO_VOI_DE_CUONG.md](DIEU_CHINH_SO_VOI_DE_CUONG.md). Cần vẽ lại/bổ sung trước khi đưa vào báo cáo khoá luận.
+
 Tài liệu này cung cấp mã nguồn **PlantUML** cho Sơ đồ lớp (Class Diagram) của **Hệ thống đặt lịch khám bệnh trực tuyến (Medical Appointment System)** được sửa lỗi tương thích 100% với **draw.io**.
 
 > [!NOTE]
