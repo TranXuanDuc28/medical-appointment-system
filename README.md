@@ -1,150 +1,184 @@
-# Medical Appointment System
+# Hệ thống đặt lịch khám bệnh và quản lý hàng đợi tích hợp AI
 
-Hệ thống đặt lịch khám bệnh trực tuyến toàn diện, bao gồm Backend (Node.js & Express), Frontend (React) và Chatbot hỗ trợ.
+Đồ án tốt nghiệp (VKU – Khoa Khoa học Máy tính, ngành Công nghệ phần mềm): hệ thống **liên thông đặt lịch khám với hàng đợi thời gian thực**, dự đoán thời gian chờ bằng Machine Learning, gợi ý chuyên khoa từ triệu chứng, nhắc hẹn và cân bằng tải phòng khám.
 
-## 🌟 Tổng quan dự án
+*Developing an AI-Integrated Appointment Scheduling and Patient Queue Management System.*
+Nhóm thực hiện: Trần Xuân Đức (backend, CSDL, AI) · Ngô Thị Mỹ Lành (frontend, UI/UX). Giảng viên hướng dẫn: TS. Nguyễn Thanh Tuấn.
 
-Dự án này được thiết kế để quản lý việc đặt lịch khám, hồ sơ bệnh nhân, và hỗ trợ tư vấn qua chatbot. Hệ thống cung cấp giao diện cho cả Bệnh nhân, Bác sĩ và Quản trị viên.
+> Hệ thống phát triển từ một ứng dụng đặt lịch kiểu BookingCare (đặt lịch, thanh toán, chat, chatbot tư vấn) rồi được nâng cấp thành hệ thống hàng đợi thông minh theo đề cương. **Số liệu thật và những chỗ khác đề cương** xem [docs/DIEU_CHINH_SO_VOI_DE_CUONG.md](docs/DIEU_CHINH_SO_VOI_DE_CUONG.md).
 
----
+## Hệ thống làm được gì
 
-## 🗺️ Sơ đồ kiến trúc & Luồng hoạt động
+- **Đặt lịch an toàn:** chọn bác sĩ/khung giờ, giữ chỗ có hạn đến khi xác nhận qua email, chặn đặt trùng khi nhiều người đặt cùng lúc.
+- **Hàng đợi thực:** check-in, cấp số thứ tự (không trùng), gọi số, bấm giờ ca khám, ưu tiên khẩn cấp/cao tuổi/trẻ nhỏ, dời lượt, vắng mặt; phát sự kiện realtime cho bệnh nhân, bác sĩ và TV sảnh.
+- **ETA bằng ML:** thời gian chờ = phần còn lại của ca đang khám + tổng thời lượng dự kiến của những người đứng trước; có dự phòng khi AI lỗi (trung bình lịch sử → mặc định 15 phút).
+- **Bệnh nhân vãng lai:** đăng ký tại quầy, hệ thống tự chọn bác sĩ đang trực có thời gian chờ ngắn nhất.
+- **Nhắc hẹn:** trước 24h và 2h; cảnh báo khi sắp đến lượt; API thông báo + realtime cho chuông thông báo.
+- **Gợi ý chuyên khoa:** từ triệu chứng tiếng Việt, kèm luật cấp cứu chạy trước mô hình.
+- **Phân quyền chi tiết (RBAC theo permission):** cấu hình trong DB, default-deny, nhật ký audit.
+- **Tính năng sẵn có từ trước:** hồ sơ bệnh án + đơn thuốc PDF qua email, thanh toán PayOS/VietQR, chat bác sĩ–bệnh nhân, cẩm nang, gói khám, chatbot tư vấn (RAG + Gemini).
 
-### 1. Sơ đồ kiến trúc hệ thống (System Architecture)
-Sự tương tác giữa Client, Backend Services, AI Service và các dịch vụ bên thứ ba (Third-party APIs):
+## Trạng thái (27/11/2026)
 
-```mermaid
-graph TD
-  %% Client Layer
-  ReactJS["React.js SPA (Frontend)"]
+| Phần | Tình trạng |
+|---|---|
+| Backend: xác thực/RBAC, schema v2, đặt lịch, lõi hàng đợi, tích hợp AI | Xong |
+| Backend: nhắc hẹn, cân bằng tải vãng lai, API thông báo | Xong (Pull Request, chờ merge) |
+| AI Service (3 mô hình + API) | Xong |
+| Frontend: e-Ticket QR, Live Queue Tracker, Cổng bác sĩ, TV sảnh + đọc loa, quản lý phòng, quản trị RBAC, Heatmap | **Chưa làm** (đang thực hiện) |
+| Cân bằng tải: chuyển vé vãng lai giữa các phòng, tự đánh vắng mặt | Xong |
+| Docker compose chạy cả hệ thống 1 lệnh | Xong (xem [Chạy bằng Docker](#chạy-bằng-docker)) |
+| Đo độ trễ/chịu tải | Xong (`backend/LOAD_TEST.md`) |
 
-  %% Backend Layer
-  subgraph Backend_Services["Backend Services"]
-    NodeJS["Node.js & Express (API)"]
-    SocketIO["Socket.io (Realtime Sync)"]
-    MySQL["MySQL Database"]
-  end
+> **Về dữ liệu ML (nói thật):** dataset Kaggle (10.000 dòng) có dấu hiệu tổng hợp; mục tiêu đề cương MAE ≤ 2.5 phút và R² ≥ 0.85 **không đạt được hợp lệ**. Kết quả thật: giảm 39.7% sai số thời gian chờ so với đoán trung bình; mô hình thời lượng khám (huấn luyện trên **dữ liệu mô phỏng**) giảm 65.7% sai số ETA so với "cố định 15 phút". Chi tiết ở [ai-service/README.md](ai-service/README.md).
 
-  %% AI Layer
-  subgraph AI_Service["AI Chatbot Microservice"]
-    Flask["Flask API Server"]
-    PhoBERT["PhoBERT (Local Intent Classifier)"]
-    FAISS["FAISS Vector DB (RAG)"]
-  end
-
-  %% External APIs
-  Gemini["Google Gemini API (LLM)"]
-  VietQR["VietQR API (MBBank Payment)"]
-  Gmail["Gmail SMTP (Email Notifications)"]
-
-  %% Interactions
-  ReactJS <-->|"HTTP REST API"| NodeJS
-  ReactJS <-->|"WebSockets"| SocketIO
-  ReactJS <-->|"HTTP REST (Chat)"| Flask
-
-  NodeJS <-->|"Sequelize ORM"| MySQL
-  NodeJS -->|"Gọi API sinh QR Code"| VietQR
-  NodeJS -->|"Gửi email kích hoạt & đơn thuốc"| Gmail
-
-  Flask -->|"Phân loại ý đồ câu hỏi"| PhoBERT
-  Flask -->|"Tìm tài liệu liên quan"| FAISS
-  Flask <-->|"Gửi Context + Prompt"| Gemini
-```
-
-### 2. Luồng xử lý của Chatbot AI (RAG & Classification Pipeline)
-Quy trình lọc câu hỏi không liên quan đến y tế và xử lý RAG trước khi gửi tới Gemini:
+## Kiến trúc
 
 ```mermaid
 graph TD
-  Start(["Người dùng nhập câu hỏi"]) --> PhoBERT{"Bộ lọc PhoBERT<br>(Medical Intent Classifier)"}
-  
-  %% Lộ trình không liên quan y tế
-  PhoBERT -->|Nhãn 0: Ngoài lề| Suggest["Suggestion Engine (Gemini)"]
-  Suggest -->|Đề xuất 1 câu hỏi y tế tương tự| Output0["Hiện câu trả lời & Gợi ý câu hỏi y khoa"]
+  subgraph Clients["Giao diện (React)"]
+    Patient["Bệnh nhân"]
+    Doctor["Bác sĩ"]
+    TV["TV sảnh"]
+    Admin["Quản trị / Quầy tiếp đón"]
+  end
 
-  %% Lộ trình y tế
-  PhoBERT -->|Nhãn 1: Y tế| VectorSearch["Tìm kiếm Vector (FAISS DB)"]
-  VectorSearch -->|"Lấy thông tin ngữ cảnh<br>(Bác sĩ, Chuyên khoa, Lịch khám)"| Context["Tạo Prompt tích hợp Context"]
-  Context --> GeminiLLM["Gemini 2.5 Flash API"]
-  GeminiLLM -->|"Sinh câu trả lời y khoa chuẩn xác"| Output1["Phản hồi câu trả lời cho người dùng"]
+  subgraph Backend["Backend (Node.js + Express)"]
+    API["REST API + RBAC"]
+    Queue["Lõi hàng đợi + ETA"]
+    Balance["Cân bằng tải vãng lai"]
+    Remind["Scheduler nhắc hẹn (BullMQ)"]
+    Socket["Socket.io"]
+  end
 
-  Output0 --> End(["Kết thúc lượt chat"])
-  Output1 --> End
+  DB[("MySQL (schema v2)")]
+  Redis[("Redis (tuỳ chọn)")]
+  AI["AI Service (FastAPI)<br>thời lượng khám · phân loại triệu chứng"]
+  Chatbot["Chatbot (Flask)<br>PhoBERT + FAISS + Gemini (module phụ)"]
+  Ext["PayOS / VietQR · Gmail SMTP · FCM"]
+
+  Clients <-->|REST| API
+  Clients <-->|WebSocket| Socket
+  Patient <-->|REST| Chatbot
+  API --- Queue
+  Queue --- Balance
+  Queue -->|ETA theo lô, có timeout + ngắt mạch| AI
+  Queue --> DB
+  Remind --> DB
+  Remind -.-> Redis
+  Queue --> Socket
+  Remind --> Socket
+  API --> Ext
 ```
 
----
+Chatbot tư vấn là **module phụ** (có dùng Gemini); các module cốt lõi (hàng đợi, ETA, phân loại triệu chứng) không gọi API AI bên ngoài. Tắt chatbot hoặc AI Service thì đặt lịch và hàng đợi vẫn chạy bình thường.
 
-Để xem chi tiết và đầy đủ **10 luồng nghiệp vụ toàn hệ thống** (bao gồm luồng Đăng nhập JWT, đặt lịch, xác thực email, thanh toán VietQR, chat realtime Socket.io, đồng bộ Vector DB FAISS, khảo sát sức khỏe...), vui lòng truy cập tài liệu:
+## Cấu trúc thư mục
 
-👉 **[Sơ đồ 10 luồng nghiệp vụ hệ thống (System Workflows)](docs/workflows.md)**
-
----
-
-## 🏗️ Cấu trúc thư mục
-
-Dự án được cấu trúc theo mô hình Microservices/Monorepo phân tách rõ ràng các thành phần Client, Backend API và AI Service:
+> `backend`, `frontend`, `chatbot` là **git submodule** (repo riêng); `ai-service` và `docs` nằm trực tiếp trong repo này. Clone: `git clone --recurse-submodules <url>`.
 
 ```text
 medical-appointment-system/
-├── backend/                  # Node.js Backend API (Express & Sequelize)
-│   ├── src/
-│   │   ├── config/           # Cấu hình Database & App
-│   │   ├── controllers/      # Hàm xử lý request (User, Doctor, Patient...)
-│   │   ├── middleware/       # Middleware xác thực JWT, phân quyền RBAC
-│   │   ├── models/           # Định nghĩa các Model Sequelize (Booking, Doctor...)
-│   │   ├── services/         # Logic nghiệp vụ (Gửi email, thanh toán VietQR...)
-│   │   ├── socket/           # Xử lý đặt lịch thời gian thực (Socket.io)
-│   │   └── route/            # Định nghĩa các đầu Endpoint API
-│   └── package.json
-├── frontend/                 # React.js Client SPA
-│   ├── src/
-│   │   ├── components/       # Các Component dùng chung (Header, Footer...)
-│   │   ├── containers/       # Các trang quản trị & người dùng (System, Patient, Doctor)
-│   │   ├── store/            # Quản lý State toàn cục bằng Redux (Actions, Reducers)
-│   │   └── utils/            # Các hàm tiện ích & Hằng số
-│   └── package.json
-└── chatbot/                  # Python Flask Service (AI Chatbot RAG)
-    ├── app/                  # Chứa các Route API của Chatbot
-    ├── core/                 # Pipeline xử lý RAG & Phân loại câu hỏi
-    │   ├── classifier/       # Bộ lọc PhoBERT nhận diện câu hỏi y khoa
-    │   ├── data/             # WebDataManager đồng bộ dữ liệu từ Node.js sang FAISS
-    │   ├── llm/              # Kết nối với Gemini API
-    │   └── vector_store/     # Quản lý Vector DB FAISS & Embeddings
-    ├── finetune_phobert.py   # Script huấn luyện PhoBERT (Colab/Local GPU)
-    ├── medical_dataset.csv   # Dữ liệu 2.800 mẫu tiếng Việt dùng để train PhoBERT
-    ├── main.py               # Điểm khởi chạy của Flask Server
-    └── requirements.txt      # Danh sách thư viện Python cần thiết
+├── backend/        # Node.js + Express + Sequelize + Socket.io (submodule)
+│   ├── src/        #   config · controllers · middleware · models · services (queue, ai) · socket · migrations
+│   ├── QUEUE_ENGINE.md      # lõi hàng đợi, API, cân bằng tải
+│   ├── AI_INTEGRATION.md    # cách backend dùng AI Service
+│   └── REMINDERS.md         # nhắc hẹn + API thông báo
+├── frontend/       # React SPA (submodule)
+├── chatbot/        # Flask: PhoBERT + FAISS + Gemini (submodule)
+├── ai-service/     # FastAPI: dự đoán thời lượng khám, phân loại triệu chứng, báo cáo ML (xem README riêng)
+└── docs/           # tài liệu thiết kế (xem bảng dưới)
 ```
 
-## 🚀 Hướng dẫn nhanh
+## Chạy bằng Docker
 
-Để chạy toàn bộ hệ thống, bạn cần khởi động cả Backend NodeJS, Frontend và Chatbot:
+Cần Docker Desktop (hoặc Docker Engine + Compose v2). **Một lệnh** dựng MySQL, Redis, AI Service, API và giao diện:
 
-### 1. Khởi động Backend (Node.js & Express)
-Vào thư mục `backend` và làm theo các bước:
-- Cần cài đặt: Node.js, MySQL.
-- Lệnh: `npm install` && `npm run dev`.
-- Chạy tại: `http://localhost:6969`.
+```bash
+git clone --recurse-submodules <url-repo> && cd medical-appointment-system
+docker compose up --build
+```
 
-### 2. Khởi động Frontend (React.js)
-Vào thư mục `frontend` và làm theo các bước:
-- Cần cài đặt: Node.js, npm/yarn.
-- Lệnh: `npm install` && `npm start`.
-- Chạy tại: `http://localhost:3000`.
+Lần đầu build mất vài phút (tải ảnh nền, cài thư viện, build React; máy dev đo được ~20 phút khi mạng chậm). Từ lần sau chỉ vài giây. Khi log API hiện `Nhắc hẹn đã bật`, hệ thống đã sẵn sàng:
 
-### 3. Khởi động Chatbot (Python Flask)
-Vào thư mục `chatbot` và làm theo các bước:
-- Cần cài đặt: Python 3.8+, PyTorch, FAISS.
-- Lệnh: `pip install -r requirements.txt` && `python main.py`.
-- Chạy tại: `http://localhost:5002`.
+| Địa chỉ | Dịch vụ |
+|---|---|
+| http://localhost:3000 | Giao diện (React + nginx) |
+| http://localhost:6969 | API + Socket.io |
+| `127.0.0.1:3307` | MySQL (user `clinic`, root `demo_root_pw`) để xem dữ liệu bằng DBeaver/Workbench |
+| nội bộ `ai:8001`, `redis:6379` | AI Service, Redis (không mở ra ngoài) |
 
-## 🛠️ Công nghệ sử dụng
+**Tài khoản demo** (mật khẩu chung `Demo@12345`, đổi bằng `DEMO_PASSWORD`). Dữ liệu demo được nạp tự động mỗi lần khởi động (chạy lại không nhân đôi, lịch khám luôn tính từ hôm nay):
 
-- **Frontend**: React.js, Redux, SCSS, Bootstrap.
-- **Backend**: Node.js, Express.js, Sequelize ORM.
-- **Database**: MySQL.
-- **AI & Chatbot**: Python Flask, PhoBERT, FAISS Vector DB, Gemini API.
-- **Khác**: Socket.io (Đồng bộ thời gian thực), Nodemailer (Gửi email đơn thuốc PDF), VietQR API (Tạo mã QR thanh toán).
+| Email | Vai trò |
+|---|---|
+| `admin@demo.local` | Quản trị (R1) |
+| `bacsi1@demo.local` (Nội), `bacsi2@demo.local` (Tim mạch), `bacsi3@demo.local` (Nhi) | Bác sĩ (R2) |
+| `benhnhan1@demo.local`, `benhnhan2@demo.local` (cao tuổi, thử ưu tiên) | Bệnh nhân (R3). Mỗi người có sẵn 1 lịch hẹn đã xác nhận hôm nay để check-in ngay |
+| `thungan@demo.local` | Thu ngân (R4) |
+| `letan@demo.local` | Lễ tân (R5) |
+| `yta@demo.local` | Y tá (R6) |
+| `dieuphoi@demo.local` | Điều phối viên (R7), xem heatmap/chuyển vé |
+| `tv@demo.local` | Màn hình sảnh chờ (R8) |
 
----
-*Developed with ❤️ by TranXuanDucIT*
+Thử nhanh luồng hàng đợi: `benhnhan1` check-in lịch hẹn (`POST /api/queue/check-in`) → `bacsi1` gọi số (`POST /api/queue/doctor/call-next`) → TV/bệnh nhân nhận sự kiện realtime.
+
+**Cấu hình:** mặc định chạy được ngay bằng bí mật DEMO. Muốn đổi cổng, mật khẩu, JWT, bật email/PayOS: `cp .env.example .env` rồi sửa (Compose tự đọc). Lệnh hữu ích:
+
+```bash
+docker compose logs -f api         # xem log API
+docker compose down                # dừng (giữ dữ liệu)
+docker compose down -v             # dừng và XOÁ dữ liệu (DB, ảnh tải lên)
+SEED_DEMO=false docker compose up  # không nạp dữ liệu demo
+```
+
+> **Lưu ý:** cấu hình mặc định chỉ để demo/dev (`NODE_ENV=demo`: cookie không bắt buộc HTTPS, CORS mở cho localhost/LAN, bí mật công khai trong file). Triển khai thật phải đặt `APP_ENV=production`, `JWT_*`/mật khẩu DB riêng, `WEB_URL`/`PUBLIC_API_URL` theo tên miền HTTPS. Chatbot (RAG + Gemini) **chưa nằm trong Compose** vì cần mô hình lớn và khoá Gemini; chạy riêng theo mục dưới. Địa chỉ API được nhúng vào giao diện lúc build (`PUBLIC_API_URL`), đổi địa chỉ thì build lại `web`.
+
+## Chạy thủ công (không Docker)
+
+Cần: Node.js 22, MySQL 8, Python 3.10 (AI Service). Redis **không bắt buộc** (không có Redis, cache dùng bộ nhớ và nhắc hẹn chạy bằng `setInterval`).
+
+**1. Backend** (cổng mặc định `6969`)
+```bash
+cd backend
+cp .env.example .env        # điền DB_*, JWT_SECRET, JWT_REFRESH_SECRET (khác nhau, >= 32 ký tự)...
+npm install
+npm run db:create           # tạo DB
+npm run db:migrate          # schema v2
+npm run db:seed             # danh mục tham chiếu
+npm run dev
+```
+Biến tuỳ chọn trong `.env`: `AI_SERVICE_URL` (để trống = tắt AI, ETA dùng trung bình lịch sử), `REDIS_*`, `REMINDERS_ENABLED`, `EMAIL_APP*`, `PAYOS_*`, `FIREBASE_*`.
+
+**2. AI Service** (cổng `8001`) — mô hình đã huấn luyện có sẵn trong `ai-service/models/`, chỉ cần chạy `serve`:
+```powershell
+cd ai-service
+py -3.10 -m venv .venv ; .venv\Scripts\pip install -r requirements.txt
+$env:PYTHONPATH = "src" ; python -m ai_service serve
+```
+Rồi đặt `AI_SERVICE_URL=http://127.0.0.1:8001` trong `.env` của backend.
+
+**3. Frontend** (cổng `3000`): `cd frontend && npm install && npm start` (đặt `REACT_APP_BACKEND_URL` trỏ tới backend).
+
+**4. Chatbot** (cổng `5002`, tuỳ chọn): `cd chatbot && pip install -r requirements.txt && python main.py`.
+
+**Kiểm thử**
+```bash
+cd backend && npm test                      # test thuần (không cần DB)
+RUN_DB_TESTS=1 npm test                     # thêm test trên MySQL thật (hàng đợi, đồng thời, phân quyền, nhắc hẹn...)
+cd ai-service && python -m pytest           # 107 test
+```
+Test DB dùng đúng CSDL trong `.env`: tạo dữ liệu tạm rồi tự dọn, chạy **tuần tự** (đã cấu hình). Nên trỏ `.env` tới DB thử nghiệm, không phải DB đang có dữ liệu thật.
+
+## Tài liệu
+
+| Tài liệu | Nội dung | Còn hiệu lực? |
+|---|---|---|
+| [docs/DIEU_CHINH_SO_VOI_DE_CUONG.md](docs/DIEU_CHINH_SO_VOI_DE_CUONG.md) | Chỗ khác đề cương, số liệu ML thật, trạng thái từng hạng mục | ✅ nguồn chính |
+| [docs/database_schema_v2.md](docs/database_schema_v2.md) | Thiết kế CSDL chuẩn (schema v2) | ✅ |
+| [docs/UML_v2.md](docs/UML_v2.md) | Bộ UML theo mã nguồn hiện tại: kiến trúc, use case, ERD, lớp, trạng thái, tuần tự, hoạt động (Mermaid) | ✅ |
+| [backend/QUEUE_ENGINE.md](backend/QUEUE_ENGINE.md) · [AI_INTEGRATION.md](backend/AI_INTEGRATION.md) · [REMINDERS.md](backend/REMINDERS.md) | Hàng đợi, tích hợp AI, nhắc hẹn/thông báo | ✅ |
+| [ai-service/README.md](ai-service/README.md) | Mô hình, quy trình ML, báo cáo | ✅ |
+| [docs/chatbot_evaluation_and_upgrade_plan.md](docs/chatbot_evaluation_and_upgrade_plan.md) | Đánh giá và kế hoạch nâng cấp **chatbot** | ✅ trong phạm vi chatbot |
+| [docs/workflows.md](docs/workflows.md) · [activity_diagrams.md](docs/activity_diagrams.md) · [sequence_diagrams.md](docs/sequence_diagrams.md) · [usecase_diagram.md](docs/usecase_diagram.md) · [class_diagram.md](docs/class_diagram.md) | Sơ đồ luồng/UML của hệ thống đặt lịch **trước khi có hàng đợi, AI và schema v2** | ⚠️ lỗi thời, đã thay bằng `UML_v2.md` |
+| [docs/database_schema.md](docs/database_schema.md) | Schema **cũ** (v1) | ❌ lỗi thời, thay bằng `database_schema_v2.md` |

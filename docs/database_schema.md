@@ -1,5 +1,8 @@
 # 🗄️ Thiết kế Cơ sở dữ liệu Hệ thống Đặt lịch Khám bệnh trực tuyến (Medical Appointment System)
 
+> [!CAUTION]
+> **TÀI LIỆU LỖI THỜI (schema v1) – không dùng cho báo cáo/phát triển mới.** Hệ thống đã chuyển sang **schema v2** (bảng `allcodes` → `reference_codes`, `histories` → `medical_records`, nhóm quyền `group/role` → RBAC theo permission, thêm hàng đợi, AI, thông báo…). Xem **[database_schema_v2.md](database_schema_v2.md)**. File này chỉ giữ để tham khảo lịch sử. *(đánh dấu 27/11/2026)*
+
 Tài liệu này tổng hợp toàn bộ cấu trúc cơ sở dữ liệu MySQL của hệ thống đặt lịch khám bệnh trực tuyến, phục vụ cho báo cáo đồ án tốt nghiệp, tài liệu kỹ thuật và thiết kế hệ thống.
 
 ---
