@@ -176,8 +176,9 @@ Test DB dùng đúng CSDL trong `.env`: tạo dữ liệu tạm rồi tự dọn
 |---|---|---|
 | [docs/DIEU_CHINH_SO_VOI_DE_CUONG.md](docs/DIEU_CHINH_SO_VOI_DE_CUONG.md) | Chỗ khác đề cương, số liệu ML thật, trạng thái từng hạng mục | ✅ nguồn chính |
 | [docs/database_schema_v2.md](docs/database_schema_v2.md) | Thiết kế CSDL chuẩn (schema v2) | ✅ |
+| [docs/UML_v2.md](docs/UML_v2.md) | Bộ UML theo mã nguồn hiện tại: kiến trúc, use case, ERD, lớp, trạng thái, tuần tự, hoạt động (Mermaid) | ✅ |
 | [backend/QUEUE_ENGINE.md](backend/QUEUE_ENGINE.md) · [AI_INTEGRATION.md](backend/AI_INTEGRATION.md) · [REMINDERS.md](backend/REMINDERS.md) | Hàng đợi, tích hợp AI, nhắc hẹn/thông báo | ✅ |
 | [ai-service/README.md](ai-service/README.md) | Mô hình, quy trình ML, báo cáo | ✅ |
 | [docs/chatbot_evaluation_and_upgrade_plan.md](docs/chatbot_evaluation_and_upgrade_plan.md) | Đánh giá và kế hoạch nâng cấp **chatbot** | ✅ trong phạm vi chatbot |
-| [docs/workflows.md](docs/workflows.md) · [activity_diagrams.md](docs/activity_diagrams.md) · [sequence_diagrams.md](docs/sequence_diagrams.md) · [usecase_diagram.md](docs/usecase_diagram.md) · [class_diagram.md](docs/class_diagram.md) | Sơ đồ luồng/UML của hệ thống đặt lịch **trước khi có hàng đợi, AI và schema v2** | ⚠️ một phần lỗi thời |
+| [docs/workflows.md](docs/workflows.md) · [activity_diagrams.md](docs/activity_diagrams.md) · [sequence_diagrams.md](docs/sequence_diagrams.md) · [usecase_diagram.md](docs/usecase_diagram.md) · [class_diagram.md](docs/class_diagram.md) | Sơ đồ luồng/UML của hệ thống đặt lịch **trước khi có hàng đợi, AI và schema v2** | ⚠️ lỗi thời, đã thay bằng `UML_v2.md` |
 | [docs/database_schema.md](docs/database_schema.md) | Schema **cũ** (v1) | ❌ lỗi thời, thay bằng `database_schema_v2.md` |
