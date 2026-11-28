@@ -1,4 +1,8 @@
 # 📋 BÁO CÁO ĐÁNH GIÁ HIỆN TRẠNG VÀ KẾ HOẠCH NÂNG CẤP TOÀN DIỆN CHATBOT Y TẾ
+
+> [!NOTE]
+> **Phạm vi: chatbot tư vấn (module phụ).** Chatbot có dùng Gemini nên không thuộc cam kết "không phụ thuộc API ngoài" của các module cốt lõi (hàng đợi, ETA, phân loại triệu chứng) — xem [DIEU_CHINH_SO_VOI_DE_CUONG.md](DIEU_CHINH_SO_VOI_DE_CUONG.md). Một số mô tả dữ liệu đồng bộ sang chatbot dựa trên schema cũ. *(ghi chú 27/11/2026)*
+
 ## Hệ thống Đặt lịch Khám bệnh Trực tuyến (Medical Appointment System)
 
 > **Ngày lập báo cáo:** 29/10/2026  

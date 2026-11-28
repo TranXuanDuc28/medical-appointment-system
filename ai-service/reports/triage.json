@@ -1,0 +1,251 @@
+{
+  "version": "20261112-ba578d04",
+  "holdout": {
+    "top1": 0.7095,
+    "top3": 0.8587,
+    "macro_f1": 0.7074,
+    "n": 630
+  },
+  "external": {
+    "top1": 0.9375,
+    "top3": 0.9688,
+    "macro_f1": 0.9384,
+    "n": 64
+  },
+  "thr_hold": [
+    {
+      "threshold": 0.0,
+      "coverage": 1.0,
+      "top1_acc_on_answered": 0.71
+    },
+    {
+      "threshold": 0.2,
+      "coverage": 0.994,
+      "top1_acc_on_answered": 0.711
+    },
+    {
+      "threshold": 0.3,
+      "coverage": 0.9,
+      "top1_acc_on_answered": 0.727
+    },
+    {
+      "threshold": 0.4,
+      "coverage": 0.784,
+      "top1_acc_on_answered": 0.755
+    },
+    {
+      "threshold": 0.5,
+      "coverage": 0.686,
+      "top1_acc_on_answered": 0.815
+    },
+    {
+      "threshold": 0.6,
+      "coverage": 0.622,
+      "top1_acc_on_answered": 0.842
+    }
+  ],
+  "thr_ext": [
+    {
+      "threshold": 0.0,
+      "coverage": 1.0,
+      "top1_acc_on_answered": 0.938
+    },
+    {
+      "threshold": 0.2,
+      "coverage": 1.0,
+      "top1_acc_on_answered": 0.938
+    },
+    {
+      "threshold": 0.3,
+      "coverage": 1.0,
+      "top1_acc_on_answered": 0.938
+    },
+    {
+      "threshold": 0.4,
+      "coverage": 0.984,
+      "top1_acc_on_answered": 0.952
+    },
+    {
+      "threshold": 0.5,
+      "coverage": 0.938,
+      "top1_acc_on_answered": 0.967
+    },
+    {
+      "threshold": 0.6,
+      "coverage": 0.922,
+      "top1_acc_on_answered": 0.966
+    }
+  ],
+  "chosen_thr": 0.6,
+  "confusion": [
+    [
+      8,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      8,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      8,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      6,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      8,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      7,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      8,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      7
+    ]
+  ],
+  "classes": [
+    "cardiology",
+    "dentistry",
+    "digestive",
+    "ent",
+    "musculoskeletal",
+    "neurology",
+    "respiratory",
+    "spine"
+  ],
+  "per_class": {
+    "cardiology": {
+      "precision": 0.727,
+      "recall": 1.0,
+      "f1-score": 0.842,
+      "support": 8.0
+    },
+    "dentistry": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 8.0
+    },
+    "digestive": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 8.0
+    },
+    "ent": {
+      "precision": 1.0,
+      "recall": 0.75,
+      "f1-score": 0.857,
+      "support": 8.0
+    },
+    "musculoskeletal": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 8.0
+    },
+    "neurology": {
+      "precision": 0.875,
+      "recall": 0.875,
+      "f1-score": 0.875,
+      "support": 8.0
+    },
+    "respiratory": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 8.0
+    },
+    "spine": {
+      "precision": 1.0,
+      "recall": 0.875,
+      "f1-score": 0.933,
+      "support": 8.0
+    }
+  },
+  "wrong": [
+    {
+      "text": "Mấy tuần nay tôi trằn trọc không ngủ được, ban ngày thì mệt rã rời",
+      "true": "neurology",
+      "pred": "cardiology",
+      "p": 0.41
+    },
+    {
+      "text": "Con tôi hay chảy máu cam vào ban đêm",
+      "true": "ent",
+      "pred": "cardiology",
+      "p": 0.75
+    },
+    {
+      "text": "Giọng tôi khàn đặc, nói chuyện khó khăn mấy ngày rồi",
+      "true": "ent",
+      "pred": "neurology",
+      "p": 0.67
+    },
+    {
+      "text": "Bác sĩ chụp phim nói tôi bị thoát vị đĩa đệm",
+      "true": "spine",
+      "pred": "cardiology",
+      "p": 0.37
+    }
+  ],
+  "n_rows": 3108,
+  "n_groups": 222,
+  "best_C": 10
+}
