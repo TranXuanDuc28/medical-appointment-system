@@ -26,8 +26,9 @@ Nhóm thực hiện: Trần Xuân Đức (backend, CSDL, AI) · Ngô Thị Mỹ 
 | Backend: nhắc hẹn, cân bằng tải vãng lai, API thông báo | Xong (Pull Request, chờ merge) |
 | AI Service (3 mô hình + API) | Xong |
 | Frontend: e-Ticket QR, Live Queue Tracker, Cổng bác sĩ, TV sảnh + đọc loa, quản lý phòng, quản trị RBAC, Heatmap | **Chưa làm** (đang thực hiện) |
-| Cân bằng tải: chuyển vé giữa các phòng khi quá tải | Chưa làm |
-| Docker compose, đo độ trễ/chịu tải | Chưa làm |
+| Cân bằng tải: chuyển vé vãng lai giữa các phòng, tự đánh vắng mặt | Xong |
+| Docker compose chạy cả hệ thống 1 lệnh | Xong (xem [Chạy bằng Docker](#chạy-bằng-docker)) |
+| Đo độ trễ/chịu tải | Xong (`backend/LOAD_TEST.md`) |
 
 > **Về dữ liệu ML (nói thật):** dataset Kaggle (10.000 dòng) có dấu hiệu tổng hợp; mục tiêu đề cương MAE ≤ 2.5 phút và R² ≥ 0.85 **không đạt được hợp lệ**. Kết quả thật: giảm 39.7% sai số thời gian chờ so với đoán trung bình; mô hình thời lượng khám (huấn luyện trên **dữ liệu mô phỏng**) giảm 65.7% sai số ETA so với "cố định 15 phút". Chi tiết ở [ai-service/README.md](ai-service/README.md).
 
@@ -89,7 +90,51 @@ medical-appointment-system/
 └── docs/           # tài liệu thiết kế (xem bảng dưới)
 ```
 
-## Chạy thử nhanh
+## Chạy bằng Docker
+
+Cần Docker Desktop (hoặc Docker Engine + Compose v2). **Một lệnh** dựng MySQL, Redis, AI Service, API và giao diện:
+
+```bash
+git clone --recurse-submodules <url-repo> && cd medical-appointment-system
+docker compose up --build
+```
+
+Lần đầu build mất vài phút (tải ảnh nền, cài thư viện, build React; máy dev đo được ~20 phút khi mạng chậm). Từ lần sau chỉ vài giây. Khi log API hiện `Nhắc hẹn đã bật`, hệ thống đã sẵn sàng:
+
+| Địa chỉ | Dịch vụ |
+|---|---|
+| http://localhost:3000 | Giao diện (React + nginx) |
+| http://localhost:6969 | API + Socket.io |
+| `127.0.0.1:3307` | MySQL (user `clinic`, root `demo_root_pw`) để xem dữ liệu bằng DBeaver/Workbench |
+| nội bộ `ai:8001`, `redis:6379` | AI Service, Redis (không mở ra ngoài) |
+
+**Tài khoản demo** (mật khẩu chung `Demo@12345`, đổi bằng `DEMO_PASSWORD`). Dữ liệu demo được nạp tự động mỗi lần khởi động (chạy lại không nhân đôi, lịch khám luôn tính từ hôm nay):
+
+| Email | Vai trò |
+|---|---|
+| `admin@demo.local` | Quản trị (R1) |
+| `bacsi1@demo.local` (Nội), `bacsi2@demo.local` (Tim mạch), `bacsi3@demo.local` (Nhi) | Bác sĩ (R2) |
+| `benhnhan1@demo.local`, `benhnhan2@demo.local` (cao tuổi, thử ưu tiên) | Bệnh nhân (R3). Mỗi người có sẵn 1 lịch hẹn đã xác nhận hôm nay để check-in ngay |
+| `thungan@demo.local` | Thu ngân (R4) |
+| `letan@demo.local` | Lễ tân (R5) |
+| `yta@demo.local` | Y tá (R6) |
+| `dieuphoi@demo.local` | Điều phối viên (R7), xem heatmap/chuyển vé |
+| `tv@demo.local` | Màn hình sảnh chờ (R8) |
+
+Thử nhanh luồng hàng đợi: `benhnhan1` check-in lịch hẹn (`POST /api/queue/check-in`) → `bacsi1` gọi số (`POST /api/queue/doctor/call-next`) → TV/bệnh nhân nhận sự kiện realtime.
+
+**Cấu hình:** mặc định chạy được ngay bằng bí mật DEMO. Muốn đổi cổng, mật khẩu, JWT, bật email/PayOS: `cp .env.example .env` rồi sửa (Compose tự đọc). Lệnh hữu ích:
+
+```bash
+docker compose logs -f api         # xem log API
+docker compose down                # dừng (giữ dữ liệu)
+docker compose down -v             # dừng và XOÁ dữ liệu (DB, ảnh tải lên)
+SEED_DEMO=false docker compose up  # không nạp dữ liệu demo
+```
+
+> **Lưu ý:** cấu hình mặc định chỉ để demo/dev (`NODE_ENV=demo`: cookie không bắt buộc HTTPS, CORS mở cho localhost/LAN, bí mật công khai trong file). Triển khai thật phải đặt `APP_ENV=production`, `JWT_*`/mật khẩu DB riêng, `WEB_URL`/`PUBLIC_API_URL` theo tên miền HTTPS. Chatbot (RAG + Gemini) **chưa nằm trong Compose** vì cần mô hình lớn và khoá Gemini; chạy riêng theo mục dưới. Địa chỉ API được nhúng vào giao diện lúc build (`PUBLIC_API_URL`), đổi địa chỉ thì build lại `web`.
+
+## Chạy thủ công (không Docker)
 
 Cần: Node.js 22, MySQL 8, Python 3.10 (AI Service). Redis **không bắt buộc** (không có Redis, cache dùng bộ nhớ và nhắc hẹn chạy bằng `setInterval`).
 
